@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>base64图片在线转换工具 - 站长工具</title>
+        <style>
+            .container{width: 100%; }
+            .title{text-align: center;}
+            .card{width: 1000px; height: 340px; padding: 10px; margin: 10px auto;}
+            .input_box .input_1{width: 497px; height: 300px; border:1px solid #c6cede; box-sizing: border-box; resize: none;outline: none; font-size: 14px;font-family: 'Microsoft YaHei'; padding: 10px;float: left;}
+            .input_box .input_2{width: 497px; height: 145px;border:1px solid #c6cede;box-sizing: border-box; resize: none;outline: none;font-size: 14px;font-family: 'Microsoft YaHei'; padding: 10px; float: right;}
+            #output_1{margin-bottom: 5px;}
+            #output_2{margin-top: 5px;}
+            .clear_float{clear: both;}
+            .button_box{margin-top: 10px;}
+            .button_box span{display: inline-block; height: 35px; line-height: 35px; font-size: 14px; color: #c0c1c4;}
+            .button_box button{float: right; margin-right: 10px; border: none; height: 35px; padding: 0px 12px;font-family: 'Microsoft YaHei';outline: none;cursor: pointer;}
+            .button_box .btn_1{ width: 120px; background-color: #55a7e3; color: #fff; border-radius: 2px;}
+            .button_box .btn_2{background-color: transparent; color:#55a7e3;}
+        </style>
+        <script src="js/jquery-1.11.3.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="title">
+                <h2>三进制位像素码实现存储数位压缩2.0版</h2>
+            </div>
+            <div class="card">
+                <div class="input_box">
+                    <textarea class="input_1" id="input" placeholder="原始数据"></textarea>
+                    <textarea class="input_2" id="output_1" placeholder="二进制编码" readonly></textarea>
+                    <textarea class="input_2" id="output_2" placeholder="三进制编码" readonly></textarea>
+                    <div class="clear_float"></div>
+                </div>
+                <div class="button_box">
+                    <span>说明：原始数据支持0-9、A-Z、a-m、|、<、>、*、#、+、-、=</span>
+                    <button class="btn_2" type="button" onclick="clear_content()">清空内容</button>
+                    <button class="btn_1" type="button" onclick="decode()">转码</button>
+                    <button class="btn_1" type="button" onclick="download()">下载</button>
+                    <input type="file" id="upfile" style="display: none;" onchange="upload()" />
+                    <button class="btn_1" type="button" for="upfile" onclick="document.getElementById('upfile').click();">选择文件</button>
+                </div>
+            </div>
+        </div>
+        <script>
+            function clear_content(){
+                $("#input").val("");
+                $("#output_1").val("");
+                $("#output_2").val("");
+            }
+
+            function decode(){
+                data = {
+                    "data":	$("#input").val(),
+                }
+                $.ajax({
+                    url : "./encode", 
+                    type : 'POST', 
+                    data : data,
+                    contentType : 'application/x-www-form-urlencoded',
+                    success : function(result) {
+                        $("#output_1").val(result.bin)
+                        $("#output_2").val(result.ter)
+                    }, 
+                    error : function(err) { 
+                        console.log(err);
+                    } 
+                });
+            }
+
+            function download(){
+                var url = "./download";
+                var form = $("<form></form>").attr("action", url).attr("method", "post");
+                form.append($("<input></input>").attr("type", "hidden").attr("name", "data").attr("value", $("#input").val()));
+                form.appendTo('body').submit().remove();
+            }
+
+            function upload(){
+                var fileData = $("#upfile")[0].files[0];
+                var formData = new FormData();
+                formData.append("file",fileData);
+                $.ajax({ 
+                    url : "./upload", 
+                    type : 'POST', 
+                    data : formData, 
+                    processData : false,
+                    contentType : false,
+                    success : function(result) {
+                        $("#input").val(result.str)
+                        $("#output_1").val(result.bin)
+                        $("#output_2").val(result.ter)
+                    },
+                    error: function(err){
+                        console.log(err);
+                    }
+                })
+            }
+        </script>
+    </body>
+</html>
